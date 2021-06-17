@@ -7,9 +7,15 @@ import csv
 import numpy as np
 
 
-def get_armor(xml_file, num_of_ratings, armor_type_1, armor_type_2, armor_type_3):
+def get_armor(xml_file):
+	# CREATES TREE AND ROOT
 	tree = ET.parse(xml_file)
 	root = tree.getroot()
+
+	# head_armor = 'Head Armor'
+	# body_armor = 'Body Armor'
+	# arm_armor = 'Arm Armor'
+	# leg_armor = 'Leg Armor'
 
 	ar_2D_list = []
 
@@ -21,18 +27,24 @@ def get_armor(xml_file, num_of_ratings, armor_type_1, armor_type_2, armor_type_3
 			culture = "neutral"
 		weight = ar.get('weight')
 		
-		if num_of_ratings == 3:
-			ar_rating_1 = ar.find('ItemComponent').find('Armor').get(armor_type_1)
-			ar_rating_2 = ar.find('ItemComponent').find('Armor').get(armor_type_2)
-			ar_rating_3 = ar.find('ItemComponent').find('Armor').get(armor_type_3)
-			entry = [id_ar, name, culture, ar_rating_1, ar_rating_2, ar_rating_3, weight]
-		elif num_of_ratings == 2:
-			ar_rating_1 = ar.find('ItemComponent').find('Armor').get(armor_type_1)
-			ar_rating_2 = ar.find('ItemComponent').find('Armor').get(armor_type_2)
-			entry = [id_ar, name, culture, ar_rating_1, ar_rating_2, weight]
-		elif num_of_ratings == 1:
-			ar_rating_1 = ar.find('ItemComponent').find('Armor').get(armor_type_1)
-			entry = [id_ar, name, culture, ar_rating_1, weight]
+		# if num_of_ratings == 3:
+		# 	ar_rating_1 = ar.find('ItemComponent').find('Armor').get(armor_type_1)
+		# 	ar_rating_2 = ar.find('ItemComponent').find('Armor').get(armor_type_2)
+		# 	ar_rating_3 = ar.find('ItemComponent').find('Armor').get(armor_type_3)
+		# 	entry = [id_ar, name, culture, ar_rating_1, ar_rating_2, ar_rating_3, weight]
+		# elif num_of_ratings == 2:
+		# 	ar_rating_1 = ar.find('ItemComponent').find('Armor').get(armor_type_1)
+		# 	ar_rating_2 = ar.find('ItemComponent').find('Armor').get(armor_type_2)
+		# 	entry = [id_ar, name, culture, ar_rating_1, ar_rating_2, weight]
+		# elif num_of_ratings == 1:
+		# 	ar_rating_1 = ar.find('ItemComponent').find('Armor').get(armor_type_1)
+		# 	entry = [id_ar, name, culture, ar_rating_1, weight]
+
+		ar_rating_head = ar.find('ItemComponent').find('Armor').get('head_armor')
+		ar_rating_body = ar.find('ItemComponent').find('Armor').get('body_armor')
+		ar_rating_arm = ar.find('ItemComponent').find('Armor').get('arm_armor')
+		ar_rating_leg = ar.find('ItemComponent').find('Armor').get('leg_armor')
+		entry = [id_ar, name, culture, ar_rating_head, ar_rating_body, ar_rating_arm, ar_rating_leg, weight]
 		
 		entry = ["0" if i == None else i for i in entry]
 		print(entry)
@@ -49,24 +61,28 @@ def get_armor(xml_file, num_of_ratings, armor_type_1, armor_type_2, armor_type_3
 	ws_name = xml_file.partition('_')[0]
 
 	with ExcelWriter('MB2.xlsx', mode='a') as writer:
-		at1 = armor_type_1.partition("_")
-		at1 = at1[0].capitalize() + " " + at1[2].capitalize()
-		if num_of_ratings >= 2:
-			at2 = armor_type_2.partition("_")
-			at2 = at2[0].capitalize() + " " + at2[2].capitalize()
-			if num_of_ratings == 3:
-				at3 = armor_type_3.partition("_")
-				at3 = at3[0].capitalize() + " " + at3[2].capitalize()
-				df.to_excel(writer, sheet_name=ws_name, index=False, header=["ID", "Name", "Culture", at1, at2, at3, "Weight"])
-			elif num_of_ratings == 2:
-				df.to_excel(writer, sheet_name=ws_name, index=False, header=["ID", "Name", "Culture", at1, at2, "Weight"])
-		elif num_of_ratings == 1:
-			df.to_excel(writer, sheet_name=ws_name, index=False, header=["ID", "Name", "Culture", at1, "Weight"])
+		# at1 = armor_type_1.partition("_")
+		# at1 = at1[0].capitalize() + " " + at1[2].capitalize()
+		# if num_of_ratings >= 2:
+		# 	at2 = armor_type_2.partition("_")
+		# 	at2 = at2[0].capitalize() + " " + at2[2].capitalize()
+		# 	if num_of_ratings == 3:
+		# 		at3 = armor_type_3.partition("_")
+		# 		at3 = at3[0].capitalize() + " " + at3[2].capitalize()
+		# 		df.to_excel(writer, sheet_name=ws_name, index=False, header=["ID", "Name", "Culture", at1, at2, at3, "Weight"])
+		# 	elif num_of_ratings == 2:
+		# 		df.to_excel(writer, sheet_name=ws_name, index=False, header=["ID", "Name", "Culture", at1, at2, "Weight"])
+		# elif num_of_ratings == 1:
+		# 	df.to_excel(writer, sheet_name=ws_name, index=False, header=["ID", "Name", "Culture", at1, "Weight"])
+
+		df.to_excel(writer, sheet_name=ws_name, index=False, header=["ID", "Name", "Culture", "Head Armor", "Body Armor", "Arm Armor", "Leg Armor", "Weight"])
+
 
 def get_npc(xml_file):
+	# CREATES TREE AND ROOT
 	tree = ET.parse(xml_file)
 	root = tree.getroot()
-
+	# INITIALIZES A 2D LIST TO STORE NPC'S AND THEIR STATS/EQUIPMENT; WILL BE USED TO PUT INTO A PANDAS DATAFRAME
 	npc_2D_list = []
 
 	for npc in root.findall('NPCCharacter'):
@@ -76,15 +92,13 @@ def get_npc(xml_file):
 		troop_type = npc.get('default_group')
 		occupation = npc.get('occupation')
 
+		# CREATES THE AN ENTRY LIST; EACH ENTRY LIST REPRESENTS AN NPC
 		entry = [id_npc, culture, name, troop_type, occupation]
 
 		skills = npc.find('skills')
 		skill_dict = {}
-		# for sk in skills.findall('skill'):
-		# 	sk_id = sk.get('id')
-		# 	val = sk.get('value')
-		# 	entry.append(val)
-		print(name)
+
+		# print(name)
 		for sk in skills.findall('skill'):
 			sk_id = sk.get('id')
 			print(sk_id)
@@ -100,8 +114,6 @@ def get_npc(xml_file):
 		entry.append(skill_dict['Throwing'])
 		entry.append(skill_dict['Riding'])
 		entry.append(skill_dict['Athletics'])
-
-
 
 		equipments = npc.find('Equipments')
 		for eq_roster in equipments.findall('EquipmentRoster'):
@@ -123,16 +135,17 @@ def get_npc(xml_file):
 
 
 def convert_id_to_name(xml_file):
+	# CREATES TREE AND ROOT
 	tree = ET.parse(xml_file)
 	root = tree.getroot()
-	wpn_dict = {}
+	eqpmnt_dict = {}
 
 	for child in root:
-		weapon_id = child.get('id')
-		weapon_name = child.get('name').partition('}')[2]
-		wpn_dict[weapon_id] = weapon_name
+		eqpmnt_id = child.get('id')
+		eqpmnt_name = child.get('name').partition('}')[2]
+		eqpmnt_dict[eqpmnt_id] = eqpmnt_name
 
-	print(wpn_dict)
+	print(eqpmnt_dict)
 
 	df = pd.read_excel('MB2.xlsx', sheet_name='npcs')
 	for rowIndex, row in df.iterrows():
@@ -141,7 +154,7 @@ def convert_id_to_name(xml_file):
 				value_tag = value.partition('_')[0]
 				value_id = value.partition('_')[2]
 				if value_tag in ['Item0', 'Item1', 'Item2', 'Item3', 'Head', 'Cape', 'Body','Gloves', 'Leg']:
-					df.at[rowIndex, columnIndex] = wpn_dict.get(value_id)
+					df.at[rowIndex, columnIndex] = eqpmnt_dict.get(value_id)
 
 	with ExcelWriter('MB2.xlsx', mode='a') as writer:
 		df.to_excel(writer, sheet_name='npcRevised', index=False)
@@ -296,15 +309,15 @@ def get_npc_armor_avg():
 		except ZeroDivisionError:
 			pass
 
-
-		print(name)
-		print(head)
-		print(shld)
-		print(body)
-		print(arm)
-		print(leg)
-		print(head_armor, body_armor, arm_armor, leg_armor, total_weight)
-		print()
+		### FOR TESTING ###
+		# print(name)
+		# print(head)
+		# print(shld)
+		# print(body)
+		# print(arm)
+		# print(leg)
+		# print(head_armor, body_armor, arm_armor, leg_armor, total_weight)
+		# print()
 
 		troop_2D_list.append([name, head_armor, body_armor, arm_armor, leg_armor, total_weight])
 
@@ -315,11 +328,11 @@ def get_npc_armor_avg():
 
 
 if __name__ == '__main__':
-	# get_armor('head_ar.xml', 1, 'head_armor', None, None)
-	# get_armor('shoulder_ar.xml', 2, 'body_armor', 'arm_armor', None)
-	# get_armor('body_ar.xml', 3, 'body_armor', 'arm_armor', 'leg_armor')
-	# get_armor('arm_ar.xml', 1, 'arm_armor', None, None)
-	# get_armor('leg_ar.xml', 1, 'leg_armor', None, None)
+	# get_armor('head_armor.xml')
+	# get_armor('shoulder_armor.xml')
+	# get_armor('body_armor.xml')
+	# get_armor('arm_armor.xml')
+	# get_armor('leg_armor.xml')
 	get_npc('npcs.xml')
 	convert_id_to_name('all_equipment.xml')
 	get_npc_armor_avg()
